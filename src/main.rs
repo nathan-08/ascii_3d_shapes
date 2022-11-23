@@ -78,43 +78,6 @@ fn triangle_algorithm(coords: &Vec<(f32,f32,f32)>, st: &str) -> () {
             }
         }
     }
-    //endwin();
-    // print debug stuff
-    //println!("{:?}, {:?}, {:?}", p1, p2, p3);
-    //panic!();
-}
-fn draw_line_fl(p1: (f32, f32), p2: (f32, f32)) -> () {
-    let left = if p1.0 < p2.0 { p1 } else { p2 };
-    let right = if p1 == left { p2 } else { p1 };
-    //if num::abs(right.0 - left.0) < 1.0 {
-        
-    //} else {
-        //for i in 0..100 {
-        for x in left.0.round() as i32..=right.0.round() as i32 {
-            //let x = (left.0 + (right.0 - left.0) / (0.1 * i as f32)).round() as i32;
-
-            let y = (left.1 + (right.1 - left.1)/(right.0 - left.0) * (x as f32 - left.0)).round() as i32;
-            if y > left.1.round() as i32 && y > right.1.round() as i32 {
-                continue;
-            }
-            if y < left.1.round() as i32 && y < right.1.round() as i32 {
-                continue;
-            }
-            mvaddstr(y, x, "#"); // draw coordinate points
-        }
-    //}
-}
-fn draw_line(p1: (i32, i32), p2: (i32, i32)) -> () {
-    let left = if p1.0 < p2.0 { p1 } else { p2 };
-    let right = if p1 == left { p2 } else { p1 };
-    //endwin();
-    // print debug stuff
-    //println!("left: {:?}\n right: {:?}", left, right);
-    //panic!(); // at the disco
-    for x in left.0..=right.0 {
-        let y = left.1 + (right.1 - left.1) / (right.0 - left.0) * (x - left.0);
-        mvaddstr(y, x, "L"); // draw coordinate points
-    }
 }
 fn draw_between(x: i32, up1: (i32, i32), up2: (i32, i32), down1: (i32, i32), down2: (i32,i32)) -> () {
     // fill in the integral lattice between upper line(up1, up2) and lower line(down1, down2)
@@ -124,7 +87,6 @@ fn draw_between(x: i32, up1: (i32, i32), up2: (i32, i32), down1: (i32, i32), dow
         mvaddstr(y, x, "t"); // draw coordinate points
     }
 }
-
 
 fn main() {
     initscr();
