@@ -24,12 +24,12 @@ fn do_thing(cx: f32,
         let mut yy = point.1;
         let mut zz = point.2;
         // <xz, xy>
-        (xx, yy, zz) = rotate_xz(angle, xx, yy, zz);
+        //(xx, yy, zz) = rotate_xz(angle, xx, yy, zz);
         (xx, yy, zz) = rotate_yz(angle, xx, yy, zz);
         (xx, yy, zz) = rotate_xy(angle, xx, yy, zz);
 
-        let distance = 0.5;
-        let scale_factor = 15.0;
+        let distance = 0.2;
+        let scale_factor = 8.0;
         let w = 1.0 / distance - zz;
         xx *= w;
         yy *= w;
@@ -54,37 +54,38 @@ fn triangle_algorithm(coords: &Vec<(f32,f32,f32)>, st: &str) -> () {
 
     for x in p1.0.round() as i32..=p2.0.round() as i32 {
         // determine upper and lower y's
-        let y_up = (p1.1 + (up.1 - p1.1)/(up.0 - p1.0) * (x as f32 - p1.0)).round() as i32; // p1 -> up
-        let y_dn = (p1.1 + (dn.1 - p1.1)/(dn.0 - p1.0) * (x as f32 - p1.0)).round() as i32; // p1 -> down
+        let slope1 = (up.1 - p1.1)/(up.0 - p1.0);
+        let slope2 = (dn.1 - p1.1)/(dn.0 - p1.0);
+
+        let greater_slope = if slope1 > slope2 { slope1 } else { slope2 };
+        let lesser_slope = if slope1 < slope2  { slope1 } else { slope2 };
+        let y_up = (p1.1 + greater_slope * (x as f32 - p1.0)).round() as i32; // p1 -> up
+        let y_dn = (p1.1 + lesser_slope * (x as f32 - p1.0)).round() as i32; // p1 -> down
         for y in y_dn..=y_up {
             if y < lower_limit || y > upper_limit { continue; }
             mvaddstr(y, x, st);
         }
     }
     for x in p2.0.round() as i32..=p3.0.round() as i32 {
-        if p2 == up {
-            let y_up = (p2.1 + (p3.1 - p2.1)/(p3.0 - p2.0) * (x as f32 - p2.0)).round() as i32; // p2 -> p3
-            let y_dn = (p1.1 + (p3.1 - p1.1)/(p3.0 - p1.0) * (x as f32 - p1.0)).round() as i32; // p1 -> p3
+        //if p2 == up {
+            let slope1 = (p3.1 - p2.1)/(p3.0 - p2.0);
+            let slope2 = (p3.1 - p1.1)/(p3.0 - p1.0);
+            let greater_slope = if slope1 > slope2 { slope1 } else { slope2 };
+            let lesser_slope = if slope1 < slope2  { slope1 } else { slope2 };
+            let y_up = (p3.1 + lesser_slope * (x as f32 - p3.0)).round() as i32; // p2 -> p3
+            let y_dn = (p3.1 + greater_slope * (x as f32 - p3.0)).round() as i32; // p1 -> p3
             for y in y_dn..=y_up {
                 if y < lower_limit || y > upper_limit { continue; }
                 mvaddstr(y, x, st);
             }
-        } else {
-            let y_up = (p1.1 + (p3.1 - p1.1)/(p3.0 - p1.0) * (x as f32 - p1.0)).round() as i32; // p1 -> p3
-            let y_dn = (p2.1 + (p3.1 - p2.1)/(p3.0 - p2.0) * (x as f32 - p2.0)).round() as i32; // p2 -> p3
-            for y in y_dn..=y_up {
-                if y < lower_limit || y > upper_limit { continue; }
-                mvaddstr(y, x, st);
-            }
-        }
-    }
-}
-fn draw_between(x: i32, up1: (i32, i32), up2: (i32, i32), down1: (i32, i32), down2: (i32,i32)) -> () {
-    // fill in the integral lattice between upper line(up1, up2) and lower line(down1, down2)
-    let y_up = up2.1 + (up2.1 - up1.1)/(up2.0 - up1.0) * (x - up2.0);
-    let y_down = down2.1 + (down2.1 - down1.1)/(down2.0 - down1.0) * (x - down2.0);
-    for y in y_up..=y_down {
-        mvaddstr(y, x, "t"); // draw coordinate points
+        //} else {
+            //let y_up = (p1.1 + (p3.1 - p1.1)/(p3.0 - p1.0) * (x as f32 - p1.0)).round() as i32; // p1 -> p3
+            //let y_dn = (p2.1 + (p3.1 - p2.1)/(p3.0 - p2.0) * (x as f32 - p2.0)).round() as i32; // p2 -> p3
+            //for y in y_dn..=y_up {
+                //if y < lower_limit || y > upper_limit { continue; }
+                //mvaddstr(y, x, st);
+            //}
+        //}
     }
 }
 
@@ -113,7 +114,7 @@ fn main() {
         ( 0.0,  -1.0/(2.0*3.0_f32.sqrt()),-0.5),
     ];
 
-    let rot: f32 = (std::f32::consts::PI * 2.0) / 200.0;
+    let rot: f32 = (std::f32::consts::PI * 2.0) / 360.0;
     let mut angle: f32 = 0.0;
 
     loop {
@@ -121,8 +122,9 @@ fn main() {
         let data1 = do_thing(cx, cy, angle, &points1, "*");
         let data2 = do_thing(cx, cy, angle, &points2, ";");
         let data3 = do_thing(cx, cy, angle, &points3, "~");
-        let data4 = do_thing(cx, cy, angle, &points4, ".");
+        let data4 = do_thing(cx, cy, angle, &points4, "'");
         let mut planes = vec![data1, data2, data3, data4];
+        //let mut planes = vec![data3];
         planes.sort_by(|a, b| b.0.partial_cmp(&a.0).unwrap());
         for (_, plane, st) in planes {
             triangle_algorithm(&plane, st);
