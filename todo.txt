@@ -1,0 +1,2 @@
+[ ] move rendering into thread
+[ ] create log file utility
